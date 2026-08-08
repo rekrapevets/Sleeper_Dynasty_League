@@ -1,0 +1,1 @@
+Stores downloaded Sleeper JSON.
