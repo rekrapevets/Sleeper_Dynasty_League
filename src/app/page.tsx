@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { getLeague, getRosters, getUsers } from "@/lib/sleeper/api";
 import { SLEEPER_LEAGUE_ID, SLEEPER_USER_ID } from "@/lib/sleeper/config";
 import { formatPoints, teamName } from "@/lib/format";
+import { getPlayoffSeeding } from "@/lib/analysis/playoffs";
 
 export default async function DashboardPage() {
   if (!SLEEPER_LEAGUE_ID) {
@@ -41,6 +42,8 @@ export default async function DashboardPage() {
     return b.settings.fpts - a.settings.fpts;
   });
 
+  const playoffSeeds = getPlayoffSeeding(rosters, usersById, SLEEPER_USER_ID);
+
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div>
@@ -69,6 +72,42 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Playoff Picture</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Per the by-laws: top 4 seeds by record, seeds 5-6 by Points For
+            among the rest. Top 2 seeds get a bye in round 1.
+          </p>
+          <ul className="divide-y">
+            {playoffSeeds.map((s) => (
+              <li
+                key={s.rosterId}
+                className="flex items-center justify-between py-2 text-sm"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="w-5 text-muted-foreground">{s.seed}</span>
+                  <span className={s.isMe ? "font-semibold" : undefined}>
+                    {s.teamName}
+                  </span>
+                  {s.isMe && <Badge variant="secondary">You</Badge>}
+                  {s.bye && <Badge variant="outline">Bye</Badge>}
+                  {s.clinchedVia === "points" && (
+                    <Badge variant="outline">PF</Badge>
+                  )}
+                </span>
+                <span className="text-muted-foreground">
+                  {s.wins}-{s.losses}
+                  {s.ties ? `-${s.ties}` : ""} &middot; {s.points}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

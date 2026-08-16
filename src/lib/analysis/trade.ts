@@ -60,8 +60,8 @@ export async function getTradeTeams(leagueId: string): Promise<TradeTeam[]> {
         value: playerTradeValue(slot.player),
       }));
 
-    const pickAssets: TradeAsset[] = team.futurePicks.map((pick) => ({
-      key: `pick-${pick.season}-${pick.round}-${team.rosterId}`,
+    const pickAssets: TradeAsset[] = team.futurePicks.map((pick, i) => ({
+      key: `pick-${pick.season}-${pick.round}-${team.rosterId}-${i}`,
       label: `${pick.season} Round ${pick.round}`,
       sublabel: "Draft Pick",
       value: pickTradeValue(pick.round, pick.season, currentSeason),
