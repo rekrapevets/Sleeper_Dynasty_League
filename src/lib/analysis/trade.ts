@@ -1,9 +1,29 @@
 import { getLeagueTeams } from "@/lib/analysis/league";
-import { getLeague } from "@/lib/sleeper/api";
+import { getLeague, getNflState } from "@/lib/sleeper/api";
 import { playerTradeValue, pickTradeValue } from "@/lib/analysis/trade-value";
 import { playerName } from "@/lib/player-display";
 import type { SleeperPlayer } from "@/lib/sleeper/types";
 import type { RosterSlot } from "@/lib/analysis/team";
+
+export interface TradeWindow {
+  isOpen: boolean;
+  week: number;
+  playoffWeekStart: number;
+}
+
+/** Dynasty Legends by-laws: trading closes from the Monday of the playoffs' first week through the championship. */
+export async function getTradeWindow(leagueId: string): Promise<TradeWindow> {
+  const [league, nflState] = await Promise.all([
+    getLeague(leagueId),
+    getNflState(),
+  ]);
+  const playoffWeekStart = league.settings.playoff_week_start ?? 15;
+  return {
+    isOpen: nflState.week < playoffWeekStart,
+    week: nflState.week,
+    playoffWeekStart,
+  };
+}
 
 export interface TradeAsset {
   key: string;
